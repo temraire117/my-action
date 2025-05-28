@@ -25,16 +25,22 @@ jobs:
         python-version: [3.12]
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
-
-      # Runs a single command using the runners shell
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Runs a set of commands using the runners shell
-      - name: Run hello.py
-        run: python3 ./hello.py
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi
+          # urllib3 에서 six 모듈 지원이 중단되어, 1.x 버전을 사용하도록 재설치
+          pip3 uninstall -y urllib3
+          pip3 install "urllib3<2"
+      - name: Run main.py
+        run: |
+          python3 main.py
+        env:
+          MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
       
